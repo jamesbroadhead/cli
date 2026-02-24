@@ -28,11 +28,11 @@ import (
 )
 
 const (
-	templatePathEnvVar  = "DATABRICKS_APPKIT_TEMPLATE_PATH"
-	appkitRepoURL       = "https://github.com/databricks/appkit"
-	appkitTemplateDir   = "template"
-	appkitDefaultBranch = "main"
-	defaultProfile      = "DEFAULT"
+	templatePathEnvVar   = "DATABRICKS_APPKIT_TEMPLATE_PATH"
+	appkitRepoURL        = "https://github.com/databricks/appkit"
+	appkitTemplateDir    = "template"
+	appkitDefaultVersion = "v0.7.4"
+	defaultProfile       = "DEFAULT"
 )
 
 // normalizeVersion ensures the version string has a "v" prefix if it looks like a semver.
@@ -42,7 +42,7 @@ func normalizeVersion(version string) string {
 		return version
 	}
 	if version == "latest" {
-		return appkitDefaultBranch
+		return "main"
 	}
 	// If it starts with a digit, prepend "v"
 	if len(version) > 0 && version[0] >= '0' && version[0] <= '9' {
@@ -154,7 +154,7 @@ Environment variables:
 
 	cmd.Flags().StringVar(&templatePath, "template", "", "Template path (local directory or GitHub URL)")
 	cmd.Flags().StringVar(&branch, "branch", "", "Git branch or tag (for GitHub templates, mutually exclusive with --version)")
-	cmd.Flags().StringVar(&version, "version", "", "AppKit version to use (default: latest release, use 'latest' for main branch)")
+	cmd.Flags().StringVar(&version, "version", "", fmt.Sprintf("AppKit version to use (default: %s, use 'latest' for main branch)", appkitDefaultVersion))
 	cmd.Flags().StringVar(&name, "name", "", "Project name (prompts if not provided)")
 	cmd.Flags().StringVar(&warehouseID, "warehouse-id", "", "SQL warehouse ID")
 	_ = cmd.Flags().MarkDeprecated("warehouse-id", "use --set <plugin>.sql-warehouse.id=<value> instead")
@@ -532,8 +532,8 @@ func runCreate(ctx context.Context, opts createOptions) error {
 		case opts.version != "":
 			gitRef = normalizeVersion(opts.version)
 		default:
-			// Default: use main branch
-			gitRef = appkitDefaultBranch
+			// Default: use pinned version
+			gitRef = appkitDefaultVersion
 		}
 		templateSrc = appkitRepoURL
 	}
