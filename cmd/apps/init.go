@@ -284,6 +284,7 @@ type templateVars struct {
 	WorkspaceHost  string
 	Bundle         tmplBundle
 	DotEnv         dotEnvVars
+	AppEnv         string
 	// Plugins maps plugin name to its metadata
 	// Missing keys return nil, enabling {{if .plugins.analytics}} conditionals.
 	Plugins map[string]*pluginVar
@@ -795,6 +796,7 @@ func runCreate(ctx context.Context, opts createOptions) error {
 			Content: generator.GenerateDotEnv(selectedPluginList, genConfig),
 			Example: generator.GenerateDotEnvExample(selectedPluginList),
 		},
+		AppEnv:  generator.GenerateAppEnv(selectedPluginList, genConfig),
 		Plugins: plugins,
 	}
 
@@ -1205,6 +1207,7 @@ func templateData(vars templateVars) map[string]any {
 			"content": vars.DotEnv.Content,
 			"example": vars.DotEnv.Example,
 		},
+		"appEnv": vars.AppEnv,
 
 		// backward compatibility (deprecated)
 		"variables":        vars.Bundle.Variables,
@@ -1217,6 +1220,7 @@ func templateData(vars templateVars) map[string]any {
 		"workspace_host":   vars.WorkspaceHost,
 		"plugin_imports":   pluginImports,
 		"plugin_usages":    pluginUsages,
+		"app_env":          vars.AppEnv,
 	}
 }
 
